@@ -1,0 +1,19 @@
+<div class="qgrid-header">
+    <table>
+        <tr>
+            <th ng-repeat="col in cols"
+                class="qgrid-header-th">
+                <div class="qgrid-header-cell"
+                     qgrid-column-drag="col"
+                     qgrid-column-drop="changeCols(col, $newCol)"
+                     ng-class="col.cssClass">
+                    {{col.displayName}}
+                    <div ng-if="col.resizable"
+                         qgrid-divider="col"
+                         qgrid-divider-drag="calcStyle()"
+                         class="divider"></div>
+                </div>
+            </th>
+        </tr>
+    </table>
+</div>

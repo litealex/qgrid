@@ -1,0 +1,60 @@
+.panel {
+}
+.border {
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+}
+
+.qgrid {
+  height: 100%;
+  position: relative;
+
+  &-table-wrapper {
+    height: 100%;
+    width: 100%;
+  }
+
+  &-header-wrapper {
+    .panel;
+  }
+
+  &-body-wrapper {
+    height: 100%;
+  }
+
+  &-footer-wrapper {
+    .panel;
+  }
+
+  &-header {
+    &-th {
+      .border;
+    }
+    &-cell {
+      overflow: hidden;
+      position: relative;
+    }
+    .divider {
+      position: absolute;
+      display: inline-block;
+      height: 100%;
+      width: 2px;
+      background-color: red;
+      right: 0;
+      top:0;
+      cursor: move;
+    }
+  }
+  &-body {
+    &-td {
+      .border;
+    }
+    &-cell {
+      overflow: hidden;
+    }
+
+    height: 100%;
+    overflow: auto;
+  }
+
+}

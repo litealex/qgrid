@@ -1,0 +1,13 @@
+<div class="qgrid-body">
+    <table>
+        <tr ng-repeat="row in rows">
+            <td ng-repeat="col in cols"
+                    class="qgrid-body-td">
+                <div ng-class="col.cssClass"
+                        class="qgrid-body-cell">
+                    {{row[col.field]}}
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>

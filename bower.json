@@ -1,0 +1,22 @@
+{
+  "name": "qgrid",
+  "version": "0.0.0",
+  "homepage": "https://github.com/litealex/qgrid",
+  "authors": [
+    "litealex <litealex@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "jquery": "1.11.1",
+    "angular": "1.2.28",
+    "bootstrap": "~3.3.1",
+    "jqueryui": "1.10.4"
+  }
+}
