@@ -2,11 +2,8 @@
     <table>
         <tr ng-repeat="row in rows">
             <td ng-repeat="col in cols"
-                    class="qgrid-body-td">
-                <div ng-class="col.cssClass"
-                        class="qgrid-body-cell">
-                    {{row[col.field]}}
-                </div>
+                qgrid-cell="{row:row.cells, col:col}"
+                class="qgrid-body-td">
             </td>
         </tr>
     </table>

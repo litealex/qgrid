@@ -29,7 +29,7 @@
   background-color: red;
   right: 0;
   top: 0;
-  cursor: move;
+  cursor: col-resize;
 }
 .qgrid-body {
   height: 100%;

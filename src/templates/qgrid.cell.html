@@ -1,0 +1,8 @@
+<div ng-class="col.cssClass"
+     class="qgrid-body-cell">
+    <div ng-repeat="part in cellInfo.content"
+         ng-click="toggle()"
+         is-edit="isEdit"
+         qgrid-Cell-Dispatcher="part">
+    </div>
+</div>
