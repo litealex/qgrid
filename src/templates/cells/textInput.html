@@ -1,0 +1,6 @@
+<div>
+    <span ng-if="!edit">
+        {{info.value}}
+    </span>
+    <input type="text" ng-if="edit" ng-blur="blur()" ng-model="info.value"/>
+</div>

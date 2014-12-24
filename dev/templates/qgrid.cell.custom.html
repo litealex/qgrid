@@ -1,0 +1,10 @@
+<div>
+    <div ng-if="!isEdit"
+         ng-click="changeView(true)">
+        {{row[col.field].value}}
+    </div>
+    <div ng-if="isEdit">
+        <textarea
+                ng-model="row[col.field].value"></textarea>
+    </div>
+</div>

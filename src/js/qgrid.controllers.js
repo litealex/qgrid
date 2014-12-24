@@ -1,13 +1,14 @@
 (function () {
     'use strict';
     angular.module('qgrid')
+        .controller('QGridCellController', ['$scope', QGridCellController])
         .controller('QGridColumnDrop', ['$scope', QGridColumnDrop])
         .controller('QGridController', ['$scope', 'qgridSrv', QGridController]);
 
-    function QGridController($scope, qgridSrv) {
+    function QGridController($scope) {
         return {
             $srv: function () {
-                return $scope.getService();
+                return $scope.$srv;
             }
         };
     }
@@ -19,6 +20,18 @@
         };
         return {
             getDropScope: $scope.getDropScope
+        };
+    }
+
+    function QGridCellController($scope) {
+        return {
+            toogle: function (isEdit) {
+                $scope.isEdit = isEdit;
+            },
+            setSortValue: function (val) {
+                $scope.cellInfo.sortValue = val;
+            }
+
         };
     }
 

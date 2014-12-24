@@ -1,28 +1,40 @@
 (function () {
     'use strict';
     angular.module('qgrid')
+
         .directive('qgridColumnDrop', ['$parse', 'qgridDragDropBuffer', qgridColumnDrop])
         .directive('qgridColumnDrag', ['qgridDragDropBuffer', qgridColumnDrag])
         .directive('qgridDivider', [qgridDivider])
+        .directive('qgridCellDispatcher', ['cellSrv', '$compile', qgridCellDeispather])
+        .directive('qgridCell', ['$compile', '$parse', '$timeout', 'qgridCfg', qgridCell])
         .directive('qgridFooter', ['qgridCfg', qgridFooter])
         .directive('qgridBody', ['qgridCfg', qgridBody])
         .directive('qgridHeader', ['qgridCfg', qgridHeader])
-        .directive('qgrid', ['$parse', 'qgridCfg', 'qgridSrv', qgrid]);
+        .directive('qgrid', ['$parse', '$q', 'qgridCfg', 'qgridSrv', qgrid]);
 
-    function qgrid($parse, qgridCfg, qgridSrv) {
+    function qgrid($parse, $q, qgridCfg, qgridSrv) {
         return {
             scope: true,
             replace: true,
             templateUrl: qgridCfg.getTemplate('qgrid'),
             link: function (scope, element, attrs) {
-                scope.$options = $parse(attrs.qgrid)(scope);
-                scope.rows = scope.$options.data;
-                var $srv = qgridSrv.getService(scope.$options);
-                scope.stylePrefix = $srv.stylePrefix;
+                var defer = $q.defer();
+                scope.$watch(attrs.qgrid, function ($options) {
+                    var _srv;
+                    if (!$options) {
+                        return;
+                    }
 
-                scope.getService = function () {
-                    return $srv;
-                };
+                    scope.$options = $options;
+                    scope.rows = $options.data;
+
+                    _srv = qgridSrv.getService($options);
+
+                    defer.resolve(_srv);
+                    scope.stylePrefix = _srv.stylePrefix;
+                });
+
+                scope.$srv = defer.promise;
             },
             controller: 'QGridController'
         };
@@ -34,21 +46,24 @@
             replace: true,
             templateUrl: qgridCfg.getTemplate('qgrid.header'),
             link: function (scope, element, attrs, qgrid) {
-                var $srv = qgrid.$srv();
-                scope.cols = $srv.getColumns();
-                scope.calcStyle = function () {
-                    $srv.createStyle();
-                };
-                scope.changeCols = function (col, newCol, $isAfter, $index) {
-                    scope.$apply(function () {
-                        var cols = scope.cols,
-                            i1 = getIndex(cols, col),
-                            i2 = getIndex(cols, newCol);
-                        cols[i1] = newCol;
-                        cols[i2] = col;
+                qgrid.$srv()
+                    .then(function ($srv) {
+                        scope.headerRows = $srv.getHeader();
+                        scope.cols = $srv.getColumns();
+                        scope.calcStyle = function () {
+                            $srv.createStyle();
+                        };
+                        scope.changeCols = function (col, newCol, $isAfter, $index) {
+                            scope.$apply(function () {
+                                var cols = scope.cols,
+                                    i1 = getIndex(cols, col),
+                                    i2 = getIndex(cols, newCol);
+                                cols[i1] = newCol;
+                                cols[i2] = col;
+                            });
+                        };
+                        $srv.createStyle();
                     });
-                };
-                $srv.createStyle();
             }
         };
     }
@@ -59,7 +74,6 @@
             templateUrl: qgridCfg.getTemplate('qgrid.body'),
             require: '^qgrid',
             link: function (scope, element, attrs, qgrid) {
-                var $srv = qgrid.$srv();
             }
         };
     }
@@ -68,6 +82,53 @@
         return {
             replace: true,
             templateUrl: qgridCfg.getTemplate('qgrid.footer')
+        };
+    }
+
+    function qgridCellDeispather(cellSrv, $compile){
+        return {
+            scope: {
+                info:'=qgridCellDispatcher',
+                isEdit: '='
+            },
+
+            link:function(scope, element, attrs){
+                element.html($compile(cellSrv.getTemplate(scope.info))(scope));
+            }
+        };
+    }
+
+    function qgridCell($compile, $parse, $timeout, qgridCfg) {
+        return {
+            require: '^qgrid',
+            controller: 'QGridCellController',
+            scope: true,
+            templateUrl: qgridCfg.getTemplate('qgrid.cell'),
+            link: function (scope, element, attrs, qgrid) {
+                qgrid.$srv().then(function ($srv) {
+                    var cell = $parse(attrs.qgridCell)(scope);
+                    scope.cellInfo = $srv.getTemplateInfo(cell.row, cell.col);
+
+                    scope.toggle = function(){
+                        scope.isEdit = true;
+                        setTimeout(function(){
+                            element.find('input, textarea').focus();
+                        },150);
+                    };
+
+                    scope.isEdit = false;
+                    scope.changeView = function (isEdit) {
+                        $timeout(function () {
+                            scope.isEdit = isEdit;
+                            setTimeout(function () {
+                                element.find('input, textarea').focus();
+                            }, 25);
+                        }, 100);
+
+                    };
+                });
+
+            }
         };
     }
 
@@ -93,9 +154,9 @@
                         event.stopPropagation();
                         col.width = colWidth + dividerWidth + event.pageX - pageX + 'px';
                         scope.onDrag();
-                        setTimeout(function(){
+                        setTimeout(function () {
                             element.attr('style', '');
-                        },25);
+                        }, 25);
 
                     }
                 });
@@ -142,7 +203,6 @@
             }
         };
     }
-
 
     function getIndex(array, item) {
         var len = array.length;
