@@ -8,14 +8,32 @@
 
 
     function cellSrv($parse) {
-        this.getTemplate = function (ci) {
 
-            var type = $parse('fieldDescription.type')(ci);
-            if (type !== undefined) {
-                return templates[type]();
-            } else {
-                return templates['action']();
+        this.getTemplate = function (cells, col) {
+
+            var i, len = cells.length;
+            for (i = 0; i < len; i++) {
+                if (cells[i].colId === col.node.colId) {
+                    return this.getTemplatePart(cells[i].content);
+                }
             }
+        };
+
+        this.getTemplatePart = function (content) {
+            var len, i, ci, type, res = [];
+
+            //var type = $parse('fieldDescription.type')(ci);
+            for (i = 0, len = content.length; i < len; i++) {
+                ci = content[i];
+                type = $parse('fieldDescription.type')(ci);
+
+                if (type !== undefined) {
+                    res.push(templates[type]());
+                } else {
+                    res.push(templates['action']());
+                }
+            }
+            return res.join('');
         };
 
         var templates = {

@@ -5,7 +5,7 @@
         .directive('qgridColumnDrop', ['$parse', 'qgridDragDropBuffer', qgridColumnDrop])
         .directive('qgridColumnDrag', ['qgridDragDropBuffer', qgridColumnDrag])
         .directive('qgridDivider', [qgridDivider])
-        .directive('qgridCellDispatcher', ['cellSrv', '$compile', qgridCellDeispather])
+        .directive('qgridCellDispatcher', ['$compile', qgridCellDeispather])
         .directive('qgridCell', ['$compile', '$parse', '$timeout', 'qgridCfg', qgridCell])
         .directive('qgridFooter', ['qgridCfg', qgridFooter])
         .directive('qgridBody', ['qgridCfg', qgridBody])
@@ -91,15 +91,17 @@
         };
     }
 
-    function qgridCellDeispather(cellSrv, $compile) {
+    function qgridCellDeispather($compile) {
         return {
+            require: '^qgrid',
             scope: {
                 info: '=qgridCellDispatcher',
                 isEdit: '='
             },
-
-            link: function (scope, element, attrs) {
-                element.html($compile(cellSrv.getTemplate(scope.info))(scope));
+            link: function (scope, element, attrs, qgrid) {
+                qgrid.$srv().then(function(srv){
+                    element.html($compile(srv.cellSrv.getTemplate(scope.info))(scope));
+                });
             }
         };
     }
@@ -113,25 +115,28 @@
             link: function (scope, element, attrs, qgrid) {
                 qgrid.$srv().then(function ($srv) {
                     var cell = $parse(attrs.qgridCell)(scope);
-                    scope.cellInfo = $srv.getTemplateInfo(cell.row, cell.col);
-
-                    scope.toggle = function () {
-                        scope.isEdit = true;
-                        setTimeout(function () {
-                            element.find('input, textarea').focus();
-                        }, 150);
-                    };
-
-                    scope.isEdit = false;
-                    scope.changeView = function (isEdit) {
-                        $timeout(function () {
-                            scope.isEdit = isEdit;
-                            setTimeout(function () {
-                                element.find('input, textarea').focus();
-                            }, 25);
-                        }, 100);
-
-                    };
+                    //scope.cellInfo =
+                    console.log($srv.cellSrv.getTemplate(cell.row, cell.col));
+                    //$srv.getTemplate(cell.row, cell.col);
+                    // element.html($compile($srv.getTemplate(cell.row, cell.col))(scope));
+                    //
+                    //scope.toggle = function () {
+                    //    scope.isEdit = true;
+                    //    setTimeout(function () {
+                    //        element.find('input, textarea').focus();
+                    //    }, 150);
+                    //};
+                    //
+                    //scope.isEdit = false;
+                    //scope.changeView = function (isEdit) {
+                    //    $timeout(function () {
+                    //        scope.isEdit = isEdit;
+                    //        setTimeout(function () {
+                    //            element.find('input, textarea').focus();
+                    //        }, 25);
+                    //    }, 100);
+                    //
+                    //};
                 });
 
             }

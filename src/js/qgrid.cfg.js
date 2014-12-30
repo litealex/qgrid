@@ -1,9 +1,9 @@
 (function () {
     'use strict';
     angular.module('qgrid')
-        /**
-         *
-         * */
+    /**
+     *
+     * */
 
         .constant('qgridCfg', {
             cols: {
@@ -13,6 +13,7 @@
             templatesPrefix: '/src/templates/',
             getTemplate: function (name) {
                 return this.templatesPrefix + name + '.html?_=' + this.rnd;
-            }
+            },
+            cellSrv: 'cellSrv'
         });
 }());

@@ -4,8 +4,8 @@
         .value('qgridDragDropBuffer', {
             item: null
         })
-        .service('qgridSrv', ['$http', '$q', '$templateCache', 'qgridCfg',
-            function ($http, $q, $templateCache, qgridCfg) {
+        .service('qgridSrv', ['$http', '$q', '$templateCache', '$injector', 'qgridCfg',
+            function ($http, $q, $templateCache, $injector, qgridCfg) {
                 var idx = 1; // id таблицы для стилей
                 this.getService = function (gridOptions) {
                     return new QGridSrv({
@@ -14,7 +14,8 @@
                         stylePrefix: 'tbl' + (idx++) + '_',
                         $http: $http,
                         $q: $q,
-                        $templateCache: $templateCache
+                        $templateCache: $templateCache,
+                        $injector: $injector
                     });
                 };
             }]);
@@ -22,33 +23,35 @@
     //options, defaultOptions, stylePrefix, $http
     function QGridSrv(opts) {
         // стили для ширины колонок
-        this.style= angular.element('<style>');
+        this.style = angular.element('<style>');
         angular.element('head').append(this.style);
         // префик для стилей
         this.stylePrefix = opts.stylePrefix;
         // id используемый для создания css класса для ячейки
         this.fieldId = 1;
-
+        // кэш для стилей чтобы не изменялись при digest
         this.cssClasses = {};
 
         // последний уровень шапки, то есть ячейки не имеющие дочерних.
         this.realCols = null;
-
+        this.cellSrv = null;
 
 
         this._defaultOptions = opts.defaultOptions; // todo rename defaultOptions
         this.gridOptions = opts.gridOptions;
 
+
+        // ng services
         this.$http = opts.$http;
         this.$q = opts.$q;
         this.$templateCache = opts.$templateCache;
+        this.$injector = opts.$injector;
 
         this.init();
     }
 
-
-    QGridSrv.prototype.init = function(){
-
+    QGridSrv.prototype.init = function () {
+        this._createCellSrv();
     };
 
 
@@ -162,6 +165,11 @@
                 return cells[i];
             }
         }
+    };
+
+    QGridSrv.prototype._createCellSrv = function () {
+        var srv = this.gridOptions.cellSrv || this._defaultOptions.cellSrv;
+        this.cellSrv =  this.$injector.get(srv);
     };
 
     // helper function
