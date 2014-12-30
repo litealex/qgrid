@@ -4,16 +4,14 @@
         .value('qgridDragDropBuffer', {
             item: null
         })
-
-
         .service('qgridSrv', ['$http', '$q', '$templateCache', 'qgridCfg',
             function ($http, $q, $templateCache, qgridCfg) {
-                var idx = 1;
-                this.getService = function (options) {
+                var idx = 1; // id таблицы для стилей
+                this.getService = function (gridOptions) {
                     return new QGridSrv({
-                        options: options,
+                        gridOptions: gridOptions,
                         defaultOptions: qgridCfg,
-                        stylePrefix: 'tbl' + idx + '_',
+                        stylePrefix: 'tbl' + (idx++) + '_',
                         $http: $http,
                         $q: $q,
                         $templateCache: $templateCache
@@ -24,60 +22,47 @@
     //options, defaultOptions, stylePrefix, $http
     function QGridSrv(opts) {
         // стили для ширины колонок
-        var style = angular.element('<style>');
-        angular.element('head').append(style);
+        this.style= angular.element('<style>');
+        angular.element('head').append(this.style);
+        // префик для стилей
+        this.stylePrefix = opts.stylePrefix;
+        // id используемый для создания css класса для ячейки
         this.fieldId = 1;
+
         this.cssClasses = {};
 
-
-        // устанавливается в headerFromTree
+        // последний уровень шапки, то есть ячейки не имеющие дочерних.
         this.realCols = null;
 
-        this.style = style;
-        this.stylePrefix = opts.stylePrefix;
+
 
         this._defaultOptions = opts.defaultOptions; // todo rename defaultOptions
-        this.options = opts.options; // todo rename gridOptions
+        this.gridOptions = opts.gridOptions;
 
         this.$http = opts.$http;
         this.$q = opts.$q;
         this.$templateCache = opts.$templateCache;
+
+        this.init();
     }
 
-    QGridSrv.prototype.getColumns = function () {
-        this.checkCols(this.realCols);
-        return this.realCols;
-        /*
-         var options = this.options,
-         cols = options.cols,
-         row, prop;
 
+    QGridSrv.prototype.init = function(){
 
-
-
-         if (!cols) {
-         cols = [];
-         row = this.options.data && this.options.data[0];
-         if (row) {
-         for (prop in row) {
-         if (!row.hasOwnProperty(prop)) {
-         continue;
-         }
-         cols.push({
-         field: prop,
-         displayName: prop,
-         resizable: options.resizableCols
-         });
-         }
-         }
-         }
-         this.checkCols(cols);
-         this.cols = cols;
-         return cols;*/
     };
-    QGridSrv.prototype.checkCols = function (cols) {
+
+
+    QGridSrv.prototype.getColumns = function () {
+        this.setColumnsDefaults(this.realCols);
+        return this.realCols;
+    };
+
+    /**
+     * установка значений по умолчаию для коолонок
+     * */
+    QGridSrv.prototype.setColumnsDefaults = function (cols) {
         var len = cols.length,
-            options = this.options,
+            options = this.gridOptions,
             defaultWidth = this._defaultOptions.cols.width,
             col;
         for (; len--;) {
@@ -88,12 +73,13 @@
             if (col.resizable === undefined) {
                 col.resizable = options.resizableCols;
             }
-            //col.html = this.getTemplate(col.template, col.templateUrl);
         }
     };
+
+    /** создается таблица стилей и одновременно записывается
+     * название класса в колонку
+     * */
     QGridSrv.prototype.createStyle = function () {
-        // создается таблица стилей и одновременно записывается
-        // название класса в колонку
         var stylePrefix = this.stylePrefix,
             cols = this.realCols || this.getColumns(),
             col,
@@ -129,7 +115,13 @@
         return defer.promise;
     };
 
-    QGridSrv.prototype.headerFromTree = function (cols) {
+    /**
+     * по json строит древовидную шапку
+     * возвражает массив масиввов
+     * 1-й уровень строки 2-й ячейки
+     * каждая ячейка содержить rowspan и collspan
+     * */
+    QGridSrv.prototype._headerFromTree = function (cols) {
         var rowsCount = getRowsCount(cols) + 1,
             rows = [],
             row,
@@ -150,8 +142,9 @@
         }
         return rows;
     };
+
     QGridSrv.prototype.getHeader = function () {
-        return this.headerFromTree(this.options.cols);
+        return this._headerFromTree(this.gridOptions.cols);
     };
 
     QGridSrv.prototype.getFieldCssClass = function (colId) {
@@ -171,7 +164,7 @@
         }
     };
 
-// helper function
+    // helper function
     // rowspan
     function getRowsCount(cols) {
         var deeps = [0],

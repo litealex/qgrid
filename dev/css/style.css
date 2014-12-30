@@ -6,6 +6,6 @@
 
 
 
-.qgrid td, .qgrid th {
-
+.qgrid-header-cell, .qgrid-body-cell{
+    padding: 5px;
 }

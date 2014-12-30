@@ -12,6 +12,10 @@
         .directive('qgridHeader', ['qgridCfg', qgridHeader])
         .directive('qgrid', ['$parse', '$q', 'qgridCfg', 'qgridSrv', qgrid]);
 
+    /**
+     * Основная цель создать сервис в контроллере, который будет использоваться
+     * внутреннимим директивами
+     * */
     function qgrid($parse, $q, qgridCfg, qgridSrv) {
         return {
             scope: true,
@@ -53,6 +57,8 @@
                         scope.calcStyle = function () {
                             $srv.createStyle();
                         };
+
+                        // для drag/drop колонок
                         scope.changeCols = function (col, newCol, $isAfter, $index) {
                             scope.$apply(function () {
                                 var cols = scope.cols,
@@ -85,14 +91,14 @@
         };
     }
 
-    function qgridCellDeispather(cellSrv, $compile){
+    function qgridCellDeispather(cellSrv, $compile) {
         return {
             scope: {
-                info:'=qgridCellDispatcher',
+                info: '=qgridCellDispatcher',
                 isEdit: '='
             },
 
-            link:function(scope, element, attrs){
+            link: function (scope, element, attrs) {
                 element.html($compile(cellSrv.getTemplate(scope.info))(scope));
             }
         };
@@ -109,11 +115,11 @@
                     var cell = $parse(attrs.qgridCell)(scope);
                     scope.cellInfo = $srv.getTemplateInfo(cell.row, cell.col);
 
-                    scope.toggle = function(){
+                    scope.toggle = function () {
                         scope.isEdit = true;
-                        setTimeout(function(){
+                        setTimeout(function () {
                             element.find('input, textarea').focus();
-                        },150);
+                        }, 150);
                     };
 
                     scope.isEdit = false;
@@ -141,7 +147,10 @@
             link: function (scope, element, attrs) {
                 var col = scope.col,
                     dividerWidth,
-                    pageX, colWidth;
+                    pageX,
+                    colWidth,
+                    colMaxWidth,
+                    colMinWidth;
 
                 element.draggable({
                     axis: 'x',
@@ -149,15 +158,34 @@
                         dividerWidth = element.width();
                         pageX = event.pageX;
                         colWidth = parseInt(col.width);
+                        colMaxWidth = parseInt(col.maxWidth);
+                        colMinWidth = parseInt(col.minWidth);
+
+                        console.log(colMaxWidth);
                     },
                     drag: function (event, ui) {
+                        var width = colWidth + dividerWidth + event.pageX - pageX,
+                            prevent = false;
                         event.stopPropagation();
-                        col.width = colWidth + dividerWidth + event.pageX - pageX + 'px';
+
+
+                        if (colMinWidth && width < colMinWidth) {
+                            width = colMinWidth;
+                        }
+
+                        if (colMaxWidth && width > colMaxWidth) {
+                            width = colMaxWidth;
+                        }
+
+                        col.width = width + 'px';
                         scope.onDrag();
                         setTimeout(function () {
                             element.attr('style', '');
                         }, 25);
 
+                        if (prevent) {
+                            return false
+                        }
                     }
                 });
             }

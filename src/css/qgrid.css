@@ -14,8 +14,10 @@
   height: 100%;
 }
 .qgrid-header-th {
+  text-align: center;
   border-left: 1px solid #ccc;
   border-right: 1px solid #ccc;
+  position: relative;
 }
 .qgrid-header-cell {
   overflow: hidden;
@@ -26,7 +28,8 @@
   display: inline-block;
   height: 100%;
   width: 2px;
-  background-color: red;
+  background-color: #ccc;
+  opacity: 0.5;
   right: 0;
   top: 0;
   cursor: col-resize;

@@ -4,32 +4,7 @@ var express = require('express'),
 app.use(express.static(__dirname));
 
 app.get('/rest/header', function (req, res) {
-
     res.sendFile(__dirname + '/header.json');
-    //res.send([
-    //    {
-    //        "node": {
-    //            "label": "parent foo"
-    //        },
-    //        "children": [
-    //            {
-    //                "node": {
-    //                    "label": "child 1 foo",
-    //                    "colId": "{%quote%jsonClass%quote%:%quote%com.quarta.aprf.sir.entity.InputFormColumnId%quote%,%quote%id%quote%:%quote%73413fad-f604-48fd-aec5-a3707599b6ea%quote%}"
-    //                },
-    //                "children":[
-    //
-    //                ]
-    //            },
-    //            {
-    //                "node": {
-    //                    "label": "child 2 foo",
-    //                    "colId": "{%quote%jsonClass%quote%:%quote%com.quarta.aprf.sir.entity.InputFormColumnId%quote%,%quote%id%quote%:%quote%90addf50-dc20-4ecd-b935-51a4f760ff9e%quote%}"
-    //                }
-    //            }
-    //        ]
-    //    }
-    //]);
 });
 
 app.get('/rest/rows', function (req, res) {
